@@ -1,0 +1,44 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux x86_64 build. Ships no game data:
+# on first launch use "Select ROM" to load your own Majora's Mask (US) ROM.
+
+pkgname=zelda64recomp
+pkgver=1.2.2
+pkgrel=1
+pkgdesc="Native port of The Legend of Zelda: Majora's Mask (Zelda 64: Recompiled; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/Zelda64Recomp/Zelda64Recomp"
+license=('GPL-3.0-only')
+depends=('glibc' 'gcc-libs' 'sdl2' 'gtk3' 'glib2' 'pango' 'cairo' 'gdk-pixbuf2'
+         'at-spi2-core' 'freetype2' 'vulkan-icd-loader' 'hicolor-icon-theme')
+optdepends=('vulkan-driver: required for rendering')
+conflicts=('zelda64recomp-bin')
+options=('!strip' '!debug')
+source=("Zelda64Recompiled-v$pkgver-Linux-X64.zip::$url/releases/download/v$pkgver/Zelda64Recompiled-v$pkgver-Linux-X64.zip"
+        "$pkgname-$pkgver-icon.png::https://raw.githubusercontent.com/Zelda64Recomp/Zelda64Recomp/v$pkgver/icons/512.png"
+        "COPYING-$pkgver::https://raw.githubusercontent.com/Zelda64Recomp/Zelda64Recomp/v$pkgver/COPYING"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('de8b19cdb4e3ad0c10fd6d8127f7a6cc2a9eba106d89c753439178b718887c42'
+            'e5c0730eedefeb7543dfa95b6b60551c0777c07e97c4cef2ed0429b300ec0b7d'
+            '3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986'
+            '8e2549a4bd7d3dd9b4bdd70459b242b5a0f0fea76a6a35a4b2ca8f34a820c831'
+            '385fe7b2be3e173b255bf77ba23f08ed2b098529e86975fa8714c8308c1a0dc0')
+
+prepare() {
+  rm -rf dist
+  mkdir dist
+  bsdtar -xf Zelda64Recompiled.tar.gz -C dist
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a dist/. "$pkgdir/opt/$pkgname/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+  chmod 755 "$pkgdir/opt/$pkgname/Zelda64Recompiled"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -Dm644 "$pkgname-$pkgver-icon.png" "$pkgdir/usr/share/icons/hicolor/256x256/apps/$pkgname.png"
+  install -Dm644 "COPYING-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

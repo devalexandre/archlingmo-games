@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ghostship
+Comment=Super Mario 64 native port (needs your own ROM)
+Exec=ghostship
+Icon=ghostship
+Terminal=false
+Categories=Game;

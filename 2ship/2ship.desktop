@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=2 Ship 2 Harkinian
+Comment=The Legend of Zelda: Majora's Mask native port (needs your own ROM)
+Exec=2ship
+Icon=2ship
+Terminal=false
+Categories=Game;

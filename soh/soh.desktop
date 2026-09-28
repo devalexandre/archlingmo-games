@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Ship of Harkinian
+Comment=The Legend of Zelda: Ocarina of Time native port (needs your own ROM)
+Exec=soh
+Icon=soh
+Terminal=false
+Categories=Game;

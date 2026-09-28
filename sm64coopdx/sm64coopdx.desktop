@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=sm64coopdx
+GenericName=Super Mario 64 Co-op Deluxe
+Comment=Online co-op Super Mario 64 native port (needs your own ROM)
+Exec=sm64coopdx
+Icon=sm64coopdx
+Terminal=false
+Categories=Game;

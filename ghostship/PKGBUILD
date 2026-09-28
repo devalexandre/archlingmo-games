@@ -1,0 +1,55 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux AppImage. Ships no game data:
+# on first launch it asks for your own Super Mario 64 (US or JP) ROM.
+
+pkgname=ghostship
+pkgver=3.0.0
+_codename=Nautilus-Alfa
+_lusver=6b861a64d29d9fe95d100be228eb6d190231cc0d
+pkgrel=1
+pkgdesc="Native port of Super Mario 64 (Ghostship; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/HarbourMasters/Ghostship"
+license=('MIT')  # Ghostship and libultraship are both MIT
+depends=('glibc' 'gcc-libs' 'libglvnd' 'zlib' 'zenity' 'hicolor-icon-theme')
+optdepends=('vulkan-driver: Vulkan renderer')
+conflicts=('ghostship-bin')
+options=('!strip' '!debug')
+source=("Ghostship-$pkgver-Linux.zip::$url/releases/download/$pkgver/$_codename-Linux.zip"
+        "libultraship-LICENSE-$_lusver::https://raw.githubusercontent.com/Kenix3/libultraship/$_lusver/LICENSE"
+        "LICENSE-$pkgver.md::https://raw.githubusercontent.com/HarbourMasters/Ghostship/$pkgver/LICENSE.md"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('f295cb24bfd78660a9caa834e267cc009b4ccdb4ebe68005ab677dc5e4417e83'
+            'fdd4f25c62f0a30865c4395d53e731be208c7b8912d5c068dbd93ca7fadc8a97'
+            'bf8e7c7bc85e246e2d516c1f16303a453607220481a90caa2e672b57fad58137'
+            '072825a6c3295e67dd5c0926f6d24e65f12bab51d6bb349bb6c7def54167cb97'
+            '11614f27d3be9007fe53764013537a21d233a45ed34c6cf257ddb17a19ceb168')
+
+prepare() {
+  rm -rf squashfs-root
+  chmod +x ghostship.appimage
+  ./ghostship.appimage --appimage-extract >/dev/null
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/usr "$pkgdir/opt/$pkgname/"
+  rm -rf "$pkgdir/opt/$pkgname/usr/bin/"{include,lib}
+  # desktop integration is installed below under /usr/share
+  rm -rf "$pkgdir/opt/$pkgname/usr/share/"{applications,icons,pixmaps}
+  install -m644 gamecontrollerdb.txt "$pkgdir/opt/$pkgname/usr/bin/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  local f size
+  for f in squashfs-root/usr/share/icons/hicolor/*/apps/*; do
+    size=${f#squashfs-root/usr/share/icons/hicolor/}; size=${size%%/*}
+    install -Dm644 "$f" "$pkgdir/usr/share/icons/hicolor/$size/apps/$pkgname.${f##*.}"
+  done
+
+  install -Dm644 readme.txt "$pkgdir/usr/share/doc/$pkgname/README"
+  install -Dm644 "LICENSE-$pkgver.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "libultraship-LICENSE-$_lusver" "$pkgdir/usr/share/licenses/$pkgname/libultraship-LICENSE"
+}

@@ -1,0 +1,55 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux AppImage. Ships no game data:
+# on first launch it asks for your own Majora's Mask ROM.
+
+pkgname=2ship
+pkgver=5.0.1
+_codename=Battler-Bravo
+_lusver=7cb10226e7875ec48ceec2f841d00afd84eef964
+pkgrel=1
+pkgdesc="Native port of The Legend of Zelda: Majora's Mask (2 Ship 2 Harkinian; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/2ship2harkinian/2ship2harkinian"
+license=('CC0-1.0' 'MIT')  # 2Ship: CC0-1.0, libultraship: MIT
+depends=('glibc' 'gcc-libs' 'libglvnd' 'zlib' 'bzip2' 'libzip' 'libpng' 'zenity' 'hicolor-icon-theme')
+provides=('2ship2harkinian')
+conflicts=('2ship2harkinian' '2ship2harkinian-bin')
+options=('!strip' '!debug')
+source=("2Ship-$pkgver-Linux.zip::$url/releases/download/$pkgver/2Ship-$_codename-Linux.zip"
+        "libultraship-LICENSE-$_lusver::https://raw.githubusercontent.com/Kenix3/libultraship/$_lusver/LICENSE"
+        "LICENSE-$pkgver::https://raw.githubusercontent.com/2ship2harkinian/2ship2harkinian/$pkgver/LICENSE"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('6cdd4fe06f3f9b095e99c86fef70b9265cc921fb6faa7ba1e18e94e90ed0b345'
+            'fdd4f25c62f0a30865c4395d53e731be208c7b8912d5c068dbd93ca7fadc8a97'
+            'a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499'
+            'a6f6959d7d9c859c048ba98c38bb4d07391a1a39333a837e420765fe050ff32b'
+            '9d8b423d1089675f08e854a7de4810ce1539a5ec6c9e787469ddd50cfad2be98')
+
+prepare() {
+  rm -rf squashfs-root
+  chmod +x 2ship.appimage
+  ./2ship.appimage --appimage-extract >/dev/null
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/usr "$pkgdir/opt/$pkgname/"
+  # static lib + headers left over from the upstream build, unused at runtime
+  rm -rf "$pkgdir/opt/$pkgname/usr/bin/"{include,lib}
+  # desktop integration is installed below under /usr/share
+  rm -rf "$pkgdir/opt/$pkgname/usr/share/"{applications,icons,pixmaps}
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  local f size
+  for f in squashfs-root/usr/share/icons/hicolor/*/apps/*; do
+    size=${f#squashfs-root/usr/share/icons/hicolor/}; size=${size%%/*}
+    install -Dm644 "$f" "$pkgdir/usr/share/icons/hicolor/$size/apps/$pkgname.${f##*.}"
+  done
+
+  install -Dm644 readme.txt "$pkgdir/usr/share/doc/$pkgname/README"
+  install -Dm644 "libultraship-LICENSE-$_lusver" "$pkgdir/usr/share/licenses/$pkgname/libultraship-LICENSE"
+  install -Dm644 "LICENSE-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

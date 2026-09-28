@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Zelda 64: Recompiled
+Comment=Majora's Mask native PC port (needs your own ROM)
+Exec=zelda64recomp
+Icon=zelda64recomp
+Terminal=false
+Categories=Game;

@@ -1,0 +1,55 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux AppImage. Ships no game data:
+# on first launch it asks for your own Mario Kart 64 ROM.
+
+pkgname=spaghettikart
+pkgver=1.0.0
+_lusver=f40cfd33b8bc6237d635d4ed82838a7e3f785386
+pkgrel=1
+pkgdesc="Native port of Mario Kart 64 (SpaghettiKart; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/HarbourMasters/SpaghettiKart"
+# Upstream publishes no license for SpaghettiKart itself;
+# libultraship (the engine library) is MIT.
+license=('LicenseRef-unknown' 'MIT')
+depends=('glibc' 'gcc-libs' 'libglvnd' 'zenity' 'hicolor-icon-theme')
+conflicts=('spaghettikart-bin')
+options=('!strip' '!debug')
+source=("SpaghettiKart-$pkgver-Linux.zip::$url/releases/download/$pkgver/spaghetti-linux.zip"
+        "libultraship-LICENSE-$_lusver::https://raw.githubusercontent.com/Kenix3/libultraship/$_lusver/LICENSE"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('54e249bd4aa71e55c63239c9c1c0eb522b07497d85f2ede193907059e4de250c'
+            'fdd4f25c62f0a30865c4395d53e731be208c7b8912d5c068dbd93ca7fadc8a97'
+            '8bf7c598cf9deaa2ffab860d05a75291dfd096b1035130abb79a017512340b55'
+            '3d36367b316ffd1ffea3c9f801a654ca1e20f2d6a21536e4b38a694e6d0bb888')
+
+prepare() {
+  rm -rf squashfs-root
+  chmod +x spaghetti.appimage
+  ./spaghetti.appimage --appimage-extract >/dev/null
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/usr "$pkgdir/opt/$pkgname/"
+  rm -rf "$pkgdir/opt/$pkgname/usr/bin/"{include,lib}
+  # desktop integration is installed below under /usr/share
+  rm -rf "$pkgdir/opt/$pkgname/usr/share/"{applications,icons,pixmaps}
+  install -m644 gamecontrollerdb.txt "$pkgdir/opt/$pkgname/usr/bin/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  local f size
+  for f in squashfs-root/usr/share/icons/hicolor/*/apps/*; do
+    size=${f#squashfs-root/usr/share/icons/hicolor/}; size=${size%%/*}
+    install -Dm644 "$f" "$pkgdir/usr/share/icons/hicolor/$size/apps/$pkgname.${f##*.}"
+  done
+
+  install -Dm644 "libultraship-LICENSE-$_lusver" "$pkgdir/usr/share/licenses/$pkgname/libultraship-LICENSE"
+  printf '%s\n' \
+    "SpaghettiKart ($url) does not publish a license for its own code." \
+    "This package redistributes the unmodified official release binary." \
+    > "$pkgdir/usr/share/licenses/$pkgname/LicenseRef-unknown"
+}

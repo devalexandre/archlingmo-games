@@ -1,0 +1,69 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux AppImage. Ships no game data:
+# on first launch it asks for your own Star Fox 64 (US) ROM.
+
+pkgname=starship-sf64
+pkgver=2.0.0
+_codename=Barnard-Alfa
+_lusver=45c4f8d6c19c6176f5e0918917c655ea09ecc212
+pkgrel=1
+pkgdesc="Native port of Star Fox 64 (Starship; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/HarbourMasters/Starship"
+license=('CC0-1.0' 'MIT')  # Starship: CC0-1.0, libultraship: MIT
+# The AppImage bundles most of an Ubuntu 24.04 graphics/audio stack (Mesa,
+# LLVM, Wayland, PulseAudio...). We drop those and use the system ones;
+# only the app-specific libraries below are kept in /opt.
+depends=('glibc' 'gcc-libs' 'libglvnd' 'zlib' 'bzip2' 'openssl' 'libogg' 'libvorbis'
+         'alsa-lib' 'libpulse' 'libsamplerate' 'libx11' 'libxext' 'libxcursor' 'libxi'
+         'libxfixes' 'libxrandr' 'libxss' 'libdrm' 'mesa' 'wayland' 'libxkbcommon'
+         'libdecor' 'zenity' 'hicolor-icon-theme')
+conflicts=('starship-sf64-bin')
+options=('!strip' '!debug')
+source=("Starship-$pkgver-Linux.zip::$url/releases/download/v$pkgver/Starship-$_codename-Linux.zip"
+        "libultraship-LICENSE-$_lusver::https://raw.githubusercontent.com/Kenix3/libultraship/$_lusver/LICENSE"
+        "LICENSE-$pkgver.md::https://raw.githubusercontent.com/HarbourMasters/Starship/v$pkgver/LICENSE.md"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('85dd03d3ad8abd881aa3aa2b49ded336627b44b8ac8333e3c41b5bf7c4336289'
+            'fdd4f25c62f0a30865c4395d53e731be208c7b8912d5c068dbd93ca7fadc8a97'
+            '6d489af6292662d9e36d34ce49423784984a5f6e41d7b58f49b01264df59fa03'
+            'bad4321b8f6762993e75010ca852f122257e0feb360ed026b80afb8ac8a14c6e'
+            'd40c59fefc3ae94abfbd783cec591dc647d90454964cebcde21b8362224d10a4')
+
+_keep_libs=(libSDL2-2.0.so.0 libzip.so.4 libtinyxml2.so.10 libspdlog.so.1.12 libfmt.so.9)
+
+prepare() {
+  rm -rf squashfs-root
+  chmod +x starship.appimage
+  ./starship.appimage --appimage-extract >/dev/null
+
+  local f
+  for f in squashfs-root/usr/lib/*; do
+    [[ " ${_keep_libs[*]} " == *" ${f##*/} "* ]] || rm -f "$f"
+  done
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/usr "$pkgdir/opt/$pkgname/"
+  rm -rf "$pkgdir/opt/$pkgname/usr/bin/"{include,lib}
+  # desktop integration is installed below under /usr/share
+  rm -rf "$pkgdir/opt/$pkgname/usr/share/"{applications,icons,pixmaps}
+  # ROM extraction tables (config.yml + assets/yaml) and the controller DB
+  # ship next to the AppImage in the zip; the port reads them from its own dir.
+  cp -a config.yml assets gamecontrollerdb.txt "$pkgdir/opt/$pkgname/usr/bin/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  local f size
+  for f in squashfs-root/usr/share/icons/hicolor/*/apps/*; do
+    size=${f#squashfs-root/usr/share/icons/hicolor/}; size=${size%%/*}
+    install -Dm644 "$f" "$pkgdir/usr/share/icons/hicolor/$size/apps/$pkgname.${f##*.}"
+  done
+
+  install -Dm644 readme.txt "$pkgdir/usr/share/doc/$pkgname/README"
+  install -Dm644 "LICENSE-$pkgver.md" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 "libultraship-LICENSE-$_lusver" "$pkgdir/usr/share/licenses/$pkgname/libultraship-LICENSE"
+}

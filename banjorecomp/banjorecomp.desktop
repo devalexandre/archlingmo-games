@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Banjo: Recompiled
+Comment=Banjo-Kazooie native PC port (needs your own ROM)
+Exec=banjorecomp
+Icon=banjorecomp
+Terminal=false
+Categories=Game;

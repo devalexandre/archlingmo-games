@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Starship
+Comment=Star Fox 64 native port (needs your own ROM)
+Exec=starship-sf64
+Icon=starship-sf64
+Terminal=false
+Categories=Game;

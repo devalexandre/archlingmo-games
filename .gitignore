@@ -1,0 +1,14 @@
+*/src/
+*/pkg/
+*.pkg.tar.*
+*.log
+*.zip
+*.tar.gz
+*.png
+*.ico
+*.md
+!README.md
+LICENSE-*
+COPYING-*
+libultraship-LICENSE-*
+build.log

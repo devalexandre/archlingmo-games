@@ -1,0 +1,51 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux build. The release is built without
+# any ROM: on first launch it asks you to drop your own Super Mario 64 (US) ROM
+# onto the window (or put it in ~/.local/share/sm64coopdx/).
+
+pkgname=sm64coopdx
+pkgver=1.5.1
+pkgrel=1
+pkgdesc="Native online co-op port of Super Mario 64 (sm64coopdx; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/coop-deluxe/sm64coopdx"
+# Upstream publishes no license for sm64coopdx itself. The bundled
+# libdiscord_game_sdk.so is Discord's proprietary Game SDK.
+license=('LicenseRef-unknown' 'LicenseRef-Discord-Game-SDK')
+depends=('glibc' 'gcc-libs' 'libglvnd' 'sdl2' 'zlib' 'curl' 'hicolor-icon-theme')
+makedepends=('imagemagick')
+conflicts=('sm64coopdx-bin')
+options=('!strip' '!debug')
+source=("sm64coopdx-$pkgver-Linux.zip::$url/releases/download/v$pkgver/sm64coopdx_Linux.zip"
+        "$pkgname-$pkgver-icon.ico::https://raw.githubusercontent.com/coop-deluxe/sm64coopdx/v$pkgver/res/icon.ico"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+sha256sums=('4229f82fc4395e78faf192c910ffcfcc1d70f59a558cadf0f63ae548901fa5f5'
+            '76766e4dd4189d774ec2aaa12261a5a43261310023bb6280eecde3cd384ec708'
+            '3260d28d1441cd92b401dff69b94238ab885b43d90c7ead32eb15a9c77f99c3f'
+            'b069c9acf60373bd00265626f2d7b364a10bfa7873f339803440824abfc9d560')
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  install -m755 sm64coopdx "$pkgdir/opt/$pkgname/"
+  install -m755 libdiscord_game_sdk.so "$pkgdir/opt/$pkgname/"
+  cp -a dynos lang mods palettes "$pkgdir/opt/$pkgname/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"/{dynos,lang,mods,palettes}
+  # coopdx_updater is left out on purpose: updates come through pacman.
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -d "$pkgdir/usr/share/icons/hicolor/256x256/apps"
+  magick "$pkgname-$pkgver-icon.ico[0]" "$pkgdir/usr/share/icons/hicolor/256x256/apps/$pkgname.png"
+
+  install -d "$pkgdir/usr/share/licenses/$pkgname"
+  printf '%s\n' \
+    "sm64coopdx ($url) does not publish a license for its own code." \
+    "This package redistributes the unmodified official release binary." \
+    > "$pkgdir/usr/share/licenses/$pkgname/LicenseRef-unknown"
+  printf '%s\n' \
+    "/opt/sm64coopdx/libdiscord_game_sdk.so is Discord's proprietary Game SDK," \
+    "redistributed exactly as shipped in the official sm64coopdx release." \
+    "Terms: https://discord.com/developers/docs/policies-and-agreements/developer-terms-of-service" \
+    > "$pkgdir/usr/share/licenses/$pkgname/LicenseRef-Discord-Game-SDK"
+}

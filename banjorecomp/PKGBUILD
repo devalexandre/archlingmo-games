@@ -1,0 +1,45 @@
+# Maintainer: ArchLingmo <progsphp@gmail.com>
+# Repackages the official upstream Linux x86_64 build. Ships no game data:
+# on first launch use "Load ROM" to load your own Banjo-Kazooie (US) ROM.
+
+pkgname=banjorecomp
+pkgver=1.0.2
+pkgrel=1
+pkgdesc="Native port of Banjo-Kazooie (Banjo: Recompiled; needs your own ROM)"
+arch=('x86_64')
+url="https://github.com/BanjoRecomp/BanjoRecomp"
+license=('GPL-3.0-only')
+depends=('glibc' 'gcc-libs' 'sdl2' 'gtk3' 'glib2' 'pango' 'harfbuzz' 'cairo' 'gdk-pixbuf2'
+         'at-spi2-core' 'freetype2' 'vulkan-icd-loader' 'hicolor-icon-theme')
+optdepends=('vulkan-driver: required for rendering')
+conflicts=('banjorecomp-bin')
+options=('!strip' '!debug')
+source=("BanjoRecompiled-v$pkgver-Linux-X64.tar.gz::$url/releases/download/v$pkgver/BanjoRecompiled-v$pkgver-Linux-X64.tar.gz"
+        "$pkgname-$pkgver.png::https://raw.githubusercontent.com/BanjoRecomp/BanjoRecomp/v$pkgver/icons/app.png"
+        "COPYING-$pkgver::https://raw.githubusercontent.com/BanjoRecomp/BanjoRecomp/v$pkgver/COPYING"
+        "$pkgname.sh"
+        "$pkgname.desktop")
+noextract=("BanjoRecompiled-v$pkgver-Linux-X64.tar.gz")
+sha256sums=('a34a4d361221171ea638e0165301fff817c53b9cd46167c5affd37867cfc7ad0'
+            '991e10bb4ad6ef405e3027f91fee901db2fbc3ac795b9958b925bbdd68c417f5'
+            '3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986'
+            'e52b37a96b3b845818303a0e90dab57775a757ce56904a943012e649b2d2d71d'
+            '322e3027c2abed14839657478cd2f284f89863798ddff932dd48ce9535c72249')
+
+prepare() {
+  rm -rf dist
+  mkdir dist
+  bsdtar -xf "BanjoRecompiled-v$pkgver-Linux-X64.tar.gz" -C dist
+}
+
+package() {
+  install -d "$pkgdir/opt/$pkgname"
+  cp -a dist/. "$pkgdir/opt/$pkgname/"
+  chmod -R u=rwX,go=rX "$pkgdir/opt/$pkgname"
+  chmod 755 "$pkgdir/opt/$pkgname/BanjoRecompiled"
+
+  install -Dm755 "$pkgname.sh" "$pkgdir/usr/bin/$pkgname"
+  install -Dm644 "$pkgname.desktop" "$pkgdir/usr/share/applications/$pkgname.desktop"
+  install -Dm644 "$pkgname-$pkgver.png" "$pkgdir/usr/share/icons/hicolor/512x512/apps/$pkgname.png"
+  install -Dm644 "COPYING-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/COPYING"
+}

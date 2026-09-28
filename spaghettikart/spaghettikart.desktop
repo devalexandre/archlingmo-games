@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SpaghettiKart
+Comment=Mario Kart 64 native port (needs your own ROM)
+Exec=spaghettikart
+Icon=spaghettikart
+Terminal=false
+Categories=Game;
