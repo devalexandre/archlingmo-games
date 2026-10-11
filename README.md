@@ -12,7 +12,7 @@ pacman repo.
 
 | Package | Game | Upstream | Version | License | Needs |
 |---|---|---|---|---|---|
-| `soh` | The Legend of Zelda: Ocarina of Time | [HarbourMasters/Shipwright](https://github.com/HarbourMasters/Shipwright) | 9.2.3 | none published (see note) + libultraship MIT | your own copy of *Ocarina of Time* (N64 or GameCube ROM) |
+| `soh` | The Legend of Zelda: Ocarina of Time | [HarbourMasters/Shipwright](https://github.com/HarbourMasters/Shipwright) | 9.3.0 | none published (see note) + libultraship MIT | your own copy of *Ocarina of Time* (N64 or GameCube ROM) |
 | `2ship` | The Legend of Zelda: Majora's Mask | [2ship2harkinian/2ship2harkinian](https://github.com/2ship2harkinian/2ship2harkinian) | 5.0.1 | CC0-1.0 + libultraship MIT | your own copy of *Majora's Mask* (supported N64 ROM dump) |
 | `zelda64recomp` | The Legend of Zelda: Majora's Mask | [Zelda64Recomp/Zelda64Recomp](https://github.com/Zelda64Recomp/Zelda64Recomp) | 1.2.2 | GPL-3.0 | your own copy of *Majora's Mask* (US N64 ROM) |
 | `sm64coopdx` | Super Mario 64 (online co-op) | [coop-deluxe/sm64coopdx](https://github.com/coop-deluxe/sm64coopdx) | 1.5.1 | none published (see note) | your own copy of *Super Mario 64* (US ROM) |

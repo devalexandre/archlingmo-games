@@ -1,11 +1,11 @@
 # Maintainer: ArchLingmo <progsphp@gmail.com>
-# Repackages the official upstream Linux AppImage. Ships no game data:
+# Repackages the official upstream Linux AppImage (published bare since 9.3.0). Ships no game data:
 # on first launch it asks for your own Ocarina of Time ROM.
 
 pkgname=soh
-pkgver=9.2.3
-_codename=Ackbar-Delta
-_lusver=fdcaf6336776d24a6408d016b0a52243f108f250
+pkgver=9.3.0
+_codename=Dewey-Alpha
+_lusver=62e973aeb4a53ad4d22bb91e2d9373ecdfcd246c
 pkgrel=1
 pkgdesc="Native port of The Legend of Zelda: Ocarina of Time (Ship of Harkinian; needs your own ROM)"
 arch=('x86_64')
@@ -13,23 +13,24 @@ url="https://github.com/HarbourMasters/Shipwright"
 # Upstream publishes no license for Ship of Harkinian itself;
 # libultraship (the engine library) is MIT.
 license=('LicenseRef-unknown' 'MIT')
-depends=('glibc' 'gcc-libs' 'libglvnd' 'zlib' 'bzip2' 'libzip' 'libpng' 'zenity' 'hicolor-icon-theme')
+# SDL2, SDL2_net, libzip, libvorbis/opus and their codecs are bundled in /opt/soh/usr/lib
+depends=('glibc' 'gcc-libs' 'libglvnd' 'zlib' 'zenity' 'hicolor-icon-theme')
 provides=('shipwright')
 conflicts=('soh-bin')
 options=('!strip' '!debug')
-source=("SoH-$pkgver-Linux.zip::$url/releases/download/$pkgver/SoH-$_codename-Linux.zip"
+source=("SoH-$pkgver.appimage::$url/releases/download/$pkgver/SoH-$_codename.appimage"
         "libultraship-LICENSE-$_lusver::https://raw.githubusercontent.com/Kenix3/libultraship/$_lusver/LICENSE"
         "$pkgname.sh"
         "$pkgname.desktop")
-sha256sums=('f81cde8052142d6abbbaaffa70699d6748e4cde3f158be8f268c3aab338ee315'
+sha256sums=('8507bb70413e130e452ebaf5f156bfd78013ee0144364b7968680e8cf064a0fa'
             'fdd4f25c62f0a30865c4395d53e731be208c7b8912d5c068dbd93ca7fadc8a97'
             'e1ce327421e5c454c41d4436165777f3fce604917b1b415bd746115fa9f747a4'
             '7bdacfbd0408f27184abe8a9a0c0270e4627da4f105c86d373d4f39b8caf9d62')
 
 prepare() {
   rm -rf squashfs-root
-  chmod +x soh.appimage
-  ./soh.appimage --appimage-extract >/dev/null
+  chmod +x "SoH-$pkgver.appimage"
+  "./SoH-$pkgver.appimage" --appimage-extract >/dev/null
 }
 
 package() {
@@ -49,7 +50,6 @@ package() {
     install -Dm644 "$f" "$pkgdir/usr/share/icons/hicolor/$size/apps/$pkgname.${f##*.}"
   done
 
-  install -Dm644 readme.txt "$pkgdir/usr/share/doc/$pkgname/README"
   install -Dm644 "libultraship-LICENSE-$_lusver" "$pkgdir/usr/share/licenses/$pkgname/libultraship-LICENSE"
   printf '%s\n' \
     "Ship of Harkinian ($url) does not publish a license for its own code." \
